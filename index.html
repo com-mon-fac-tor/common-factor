@@ -485,6 +485,9 @@ function generateEmbedCode() {
   else if (state.focalLength !== 50) attrs.push(`focal-length="${state.focalLength}"`);
   if (state.rotSpeed !== 0.003) attrs.push(`speed="${state.rotSpeed}"`);
   if (state.autoRotate) attrs.push('auto-rotate');
+  if (state.rotX !== 0) attrs.push(`rotate-x="${state.rotX.toFixed(4)}"`);
+  if (state.rotY !== 0) attrs.push(`rotate-y="${state.rotY.toFixed(4)}"`);
+  if (state.rotZ !== 0) attrs.push(`rotate-z="${state.rotZ.toFixed(4)}"`);
 
   // Connections
   if (state.connectionsEnabled) {

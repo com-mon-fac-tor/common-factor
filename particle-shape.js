@@ -16,7 +16,8 @@ class ParticleShape extends HTMLElement {
       'perspective', 'speed',
       'depth-opacity', 'depth-sizing', 'auto-rotate',
       'spiral-arms', 'extrude-depth', 'snap-to-grid',
-      'rotate-x', 'rotate-y',
+      'rotate-x', 'rotate-y', 'rotate-z',
+      'focal-length', 'lens',
       'connections', 'hubs', 'connections-per-hub',
       'connection-opacity', 'connection-thickness',
       'hub-placement', 'hub-visible', 'hub-size',
@@ -182,8 +183,11 @@ class ParticleShape extends HTMLElement {
       case 'spiral-arms':  c.spiralArms = parseInt(value, 10) || 4; break;
       case 'extrude-depth': c.extrudeDepth = parseFloat(value) || 0.5; break;
       case 'snap-to-grid':  c.snapToGrid = value !== 'false' && value !== null; break;
-      case 'rotate-x':    c.rotX = parseFloat(value) || 0; break;
-      case 'rotate-y':    c.rotY = parseFloat(value) || 0; break;
+      case 'rotate-x':     c.rotX = parseFloat(value) || 0; break;
+      case 'rotate-y':     c.rotY = parseFloat(value) || 0; break;
+      case 'rotate-z':     c.rotZ = parseFloat(value) || 0; break;
+      case 'focal-length': c.focalLength = parseFloat(value) || 50; break;
+      case 'lens':         c.lensType = value || 'perspective'; break;
       case 'connections':           c.connectionsEnabled = value !== 'false' && value !== null; break;
       case 'hubs':                  c.hubCount = parseInt(value, 10) || 3; break;
       case 'connections-per-hub':   c.connectionsPerHub = parseInt(value, 10) || 15; break;

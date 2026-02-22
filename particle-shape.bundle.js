@@ -428,6 +428,11 @@
     return result;
   }
 
+  function focalLengthToPerspD(focalMm) {
+    const t = (Math.max(24, Math.min(200, focalMm)) - 24) / 176;
+    return 12 + t * 488;
+  }
+
   function renderFrame(ctx, w, h, points, config) {
     ctx.fillStyle = config.bgColor || '#0a0a0a';
     ctx.fillRect(0, 0, w, h);
@@ -440,7 +445,9 @@
     const rotX = config.rotX || 0;
     const rotY = config.rotY || 0;
     const rotZ = config.rotZ || 0;
-    const perspD = config.perspectiveD || 600;
+    const perspD = config.lensType === 'orthographic'
+      ? Infinity
+      : focalLengthToPerspD(config.focalLength ?? 50);
     const spacing = config.spacing || 1.0;
 
     const projected = projectPoints(
@@ -550,7 +557,8 @@
         'perspective', 'speed',
         'depth-opacity', 'depth-sizing', 'auto-rotate',
         'spiral-arms', 'extrude-depth', 'snap-to-grid',
-        'rotate-x', 'rotate-y',
+        'rotate-x', 'rotate-y', 'rotate-z',
+        'focal-length', 'lens',
         'connections', 'hubs', 'connections-per-hub',
         'connection-opacity', 'connection-thickness',
         'hub-placement', 'hub-visible', 'hub-size',
@@ -572,7 +580,8 @@
         squareSize: 3,
         color: '#ffffff',
         bgColor: '#0a0a0a',
-        perspectiveD: 600,
+        focalLength: 50,
+        lensType: 'perspective',
         zoom: 1.0,
         depthOpacity: true,
         depthSizing: true,
@@ -700,7 +709,9 @@
         case 'size':        c.squareSize = parseFloat(value) || 3; break;
         case 'color':       c.color = value || '#ffffff'; break;
         case 'bg':          c.bgColor = value || '#0a0a0a'; break;
-        case 'perspective':  c.perspectiveD = parseInt(value, 10) || 600; break;
+        case 'perspective':   c.focalLength = parseInt(value, 10) || 50; break;
+        case 'focal-length':  c.focalLength = parseFloat(value) || 50; break;
+        case 'lens':          c.lensType = value || 'perspective'; break;
         case 'speed':       c.rotSpeed = parseFloat(value) || 0.003; break;
         case 'depth-opacity': c.depthOpacity = value !== 'false' && value !== null; break;
         case 'depth-sizing':  c.depthSizing = value !== 'false' && value !== null; break;
@@ -708,8 +719,9 @@
         case 'spiral-arms':  c.spiralArms = parseInt(value, 10) || 4; break;
         case 'extrude-depth': c.extrudeDepth = parseFloat(value) || 0.5; break;
         case 'snap-to-grid':  c.snapToGrid = value !== 'false' && value !== null; break;
-        case 'rotate-x':    c.rotX = parseFloat(value) || 0; break;
-        case 'rotate-y':    c.rotY = parseFloat(value) || 0; break;
+        case 'rotate-x':     c.rotX = parseFloat(value) || 0; break;
+        case 'rotate-y':     c.rotY = parseFloat(value) || 0; break;
+        case 'rotate-z':     c.rotZ = parseFloat(value) || 0; break;
         case 'connections':           c.connectionsEnabled = value !== 'false' && value !== null; break;
         case 'hubs':                  c.hubCount = parseInt(value, 10) || 3; break;
         case 'connections-per-hub':   c.connectionsPerHub = parseInt(value, 10) || 15; break;
