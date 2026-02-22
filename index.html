@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Common Factor</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div id="app">
+  <div id="canvas-wrap">
+    <canvas id="viewport"></canvas>
+    <div id="canvas-logo"></div>
+  </div>
+  <div id="controls-wrap">
+    <div id="controls-header">
+      <span id="panel-title">Particle Generator<span id="panel-version">v0.1</span></span>
+    </div>
+  <aside id="controls">
+    <div class="section-label"><span class="section-icon" style="-webkit-mask-image: url(./icons/icon.shape.svg); mask-image: url(./icons/icon.shape.svg);"></span>Shape</div>
+    <div class="section-body" id="section-shape">
+      <div class="section-body-inner">
+        <div class="control-group">
+          <select id="shapeType">
+            <option value="sphere">Sphere</option>
+            <option value="cube">Cube</option>
+            <option value="galaxy">Galaxy</option>
+            <option value="spiralGalaxy">Spiral Galaxy</option>
+            <option value="torus">Torus</option>
+            <option value="cylinder">Cylinder</option>
+            <option value="helix">Double Helix</option>
+            <option value="svgExtrude">SVG Extrude</option>
+          </select>
+        </div>
+        <div class="control-group shape-specific" id="spiralArmsGroup">
+          <label>Arms <span class="value" id="spiralArmsVal">4</span></label>
+          <input type="range" id="spiralArms" min="1" max="8" step="1" value="4">
+        </div>
+        <div class="shape-specific" id="svgExtrudeGroup">
+          <div class="control-group">
+            <label class="upload-btn" for="svgFileInput">Upload SVG</label>
+            <input type="file" id="svgFileInput" class="upload-file-input" accept=".svg">
+            <div class="svg-filename" id="svgFileName">No file loaded</div>
+          </div>
+          <div class="control-group">
+            <label>Extrude Depth <span class="value" id="extrudeDepthVal">0.5</span></label>
+            <input type="range" id="extrudeDepth" min="0.1" max="2.0" step="0.1" value="0.5">
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="snapToGrid">
+            <label for="snapToGrid">Snap to grid</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="section-icon" style="-webkit-mask-image: url(./icons/icon.particles.svg); mask-image: url(./icons/icon.particles.svg);"></span>Particles</div>
+    <div class="section-body" id="section-particles">
+      <div class="section-body-inner">
+        <div class="control-group">
+          <label>Density <span class="value" id="densityVal">1500</span></label>
+          <input type="range" id="density" min="50" max="10000" step="50" value="1500">
+        </div>
+        <div class="control-group">
+          <label>Spacing <span class="value" id="spacingVal">1.0</span></label>
+          <input type="range" id="spacing" min="0.2" max="3.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-group">
+          <label>Randomness <span class="value" id="randomnessVal">0.00</span></label>
+          <input type="range" id="randomness" min="0" max="1" step="0.05" value="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="section-icon" style="-webkit-mask-image: url(./icons/icon.appearance.svg); mask-image: url(./icons/icon.appearance.svg);"></span>Appearance</div>
+    <div class="section-body" id="section-appearance">
+      <div class="section-body-inner">
+        <div class="control-group">
+          <label>Square Size <span class="value" id="squareSizeVal">3.0</span></label>
+          <input type="range" id="squareSize" min="1" max="12" step="0.5" value="3">
+        </div>
+        <div class="color-row">
+          <label>Dot color</label>
+          <input type="color" id="color" value="#ffffff">
+        </div>
+        <div style="height:6px"></div>
+        <div class="color-row">
+          <label>Background</label>
+          <input type="color" id="bgColor" value="#0a0a0a">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="section-icon" style="-webkit-mask-image: url(./icons/icon.connections.svg); mask-image: url(./icons/icon.connections.svg);"></span>Connections</div>
+    <div class="section-body" id="section-connections">
+      <div class="section-body-inner">
+        <div class="checkbox-group">
+          <input type="checkbox" id="connectionsEnabled">
+          <label for="connectionsEnabled">Enable connections</label>
+        </div>
+        <div class="shape-specific" id="connectionControls">
+          <div class="control-group">
+            <label>Hubs <span class="value" id="hubCountVal">3</span></label>
+            <input type="range" id="hubCount" min="1" max="10" step="1" value="3">
+          </div>
+          <div class="control-group">
+            <label>Per hub <span class="value" id="connectionsPerHubVal">15</span></label>
+            <input type="range" id="connectionsPerHub" min="1" max="100" step="1" value="15">
+          </div>
+          <div class="control-group">
+            <label>Placement</label>
+            <select id="hubPlacement">
+              <option value="mixed">Mixed</option>
+              <option value="inside">Inside</option>
+              <option value="outside">Outside</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label>Distribution</label>
+            <select id="connectionDistribution">
+              <option value="nearest">Nearest</option>
+              <option value="random">Random</option>
+              <option value="weighted" selected>Weighted</option>
+              <option value="stratified">Stratified</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label>Spread <span class="value" id="connectionSpreadVal">0.50</span></label>
+            <input type="range" id="connectionSpread" min="0" max="1" step="0.05" value="0.5">
+          </div>
+          <div class="control-group">
+            <label>Focus <span class="value" id="connectionFocusVal">0.50</span></label>
+            <input type="range" id="connectionFocus" min="0" max="1" step="0.05" value="0.5">
+          </div>
+          <div class="control-group">
+            <label>Line opacity <span class="value" id="connectionOpacityVal">0.30</span></label>
+            <input type="range" id="connectionOpacity" min="0.05" max="1.0" step="0.05" value="0.3">
+          </div>
+          <div class="control-group">
+            <label>Line thickness <span class="value" id="connectionThicknessVal">1.0</span></label>
+            <input type="range" id="connectionThickness" min="0.5" max="4" step="0.5" value="1">
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="hubVisible" checked>
+            <label for="hubVisible">Show hub points</label>
+          </div>
+          <div class="control-group">
+            <label>Hub size <span class="value" id="hubSizeVal">6.0</span></label>
+            <input type="range" id="hubSize" min="2" max="16" step="1" value="6">
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="connectionDepthOpacity" checked>
+            <label for="connectionDepthOpacity">Depth opacity on lines</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="highlightConnected">
+            <label for="highlightConnected">Highlight connected only</label>
+          </div>
+          <div id="nonConnectedColorRow">
+            <div class="color-row">
+              <label>Non-connected color</label>
+              <input type="color" id="nonConnectedColor" value="#404040">
+            </div>
+            <div class="control-group">
+              <label>Opacity <span class="value" id="nonConnectedOpacityVal">0.40</span></label>
+              <input type="range" id="nonConnectedOpacity" min="0" max="1" step="0.05" value="0.4">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="section-icon" style="-webkit-mask-image: url(./icons/icon.camera.svg); mask-image: url(./icons/icon.camera.svg);"></span>Camera</div>
+    <div class="section-body" id="section-camera">
+      <div class="section-body-inner">
+        <div class="control-group">
+          <label>Lens</label>
+          <select id="lensType">
+            <option value="perspective">Perspective</option>
+            <option value="orthographic">Orthographic</option>
+          </select>
+        </div>
+        <div class="control-group" id="perspectiveGroup">
+          <label>Focal length <span class="value" id="perspectiveVal">50mm</span></label>
+          <input type="range" id="perspective" min="24" max="200" step="2" value="50">
+        </div>
+        <div class="control-group">
+          <label>Zoom <span class="value" id="zoomVal">1.00</span></label>
+          <input type="range" id="zoom" min="0.2" max="5" step="0.05" value="1">
+        </div>
+        <div class="control-group">
+          <label>Rotation Speed <span class="value" id="rotSpeedVal">0.003</span></label>
+          <input type="range" id="rotSpeed" min="0" max="0.02" step="0.001" value="0.003">
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="autoRotate" checked>
+          <label for="autoRotate">Auto-rotate</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label"><span class="section-icon" style="-webkit-mask-image: url(./icons/icon.export.svg); mask-image: url(./icons/icon.export.svg);"></span>Export</div>
+    <div class="section-body" id="section-export">
+      <div class="section-body-inner">
+        <div class="export-row">
+          <button class="export-btn" id="exportPNG">PNG</button>
+          <button class="export-btn" id="exportSVG">SVG</button>
+        </div>
+        <div style="height:8px"></div>
+        <button class="export-btn" id="copyEmbed" style="width:100%">Copy Embed Code</button>
+      </div>
+    </div>
+  </aside>
+  </div>
+</div>
+
+<script type="module">
+import { generatePoints, generateConnections, renderFrame, projectPoints, hexToRGB, parseSVGFile, focalLengthToPerspD } from './particle-engine.js';
+
+// ── State ──────────────────────────────────────────────────────────
+const state = {
+  shapeType: 'sphere',
+  density: 1500,
+  spacing: 1.0,
+  randomness: 0.0,
+  squareSize: 3,
+  color: '#ffffff',
+  bgColor: '#0a0a0a',
+  depthOpacity: true,
+  depthSizing: true,
+  rotX: 0,
+  rotY: 0,
+  rotZ: 0,
+  autoRotate: true,
+  rotSpeed: 0.003,
+  spiralArms: 4,
+  extrudeDepth: 0.5,
+  svgOutline: [],       // [{x,y}] normalized outline points from SVG
+  svgPath2D: null,      // Path2D for interior hit testing
+  _svgNorm: null,
+  svgFileName: '',
+  snapToGrid: false,
+  lensType: 'perspective',
+  focalLength: 50,
+  // Connections
+  connectionsEnabled: false,
+  hubCount: 3,
+  connectionsPerHub: 15,
+  connectionOpacity: 0.3,
+  connectionThickness: 1,
+  hubPlacement: 'mixed',
+  connectionDistribution: 'weighted',
+  connectionSpread: 0.5,
+  connectionFocus: 0.5,
+  hubVisible: true,
+  hubSize: 6,
+  connectionDepthOpacity: true,
+  highlightConnected: false,
+  nonConnectedColor: '#404040',
+  nonConnectedOpacity: 0.4,
+  connectionData: { hubs: [], connections: [] },
+  zoom: 1.0,
+  // Interaction
+  isDragging: false,
+  lastMouseX: 0,
+  lastMouseY: 0,
+  points: [],
+};
+
+function regeneratePoints() {
+  state.points = generatePoints(state);
+  state.connectionData = generateConnections(state.points, state);
+}
+
+// ── Renderer ───────────────────────────────────────────────────────
+
+const canvas = document.getElementById('viewport');
+const ctx = canvas.getContext('2d');
+
+function getLogicalSize() {
+  const dpr = window.devicePixelRatio || 1;
+  return { w: canvas.width / dpr, h: canvas.height / dpr };
+}
+
+function getWorldScale(w, h) {
+  return Math.min(w, h) * 0.35;
+}
+
+function render() {
+  const { w, h } = getLogicalSize();
+  renderFrame(ctx, w, h, state.points, state);
+}
+
+// ── Resize ─────────────────────────────────────────────────────────
+
+function resizeCanvas() {
+  const wrap = document.getElementById('canvas-wrap');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = wrap.clientWidth * dpr;
+  canvas.height = wrap.clientHeight * dpr;
+  canvas.style.width = wrap.clientWidth + 'px';
+  canvas.style.height = wrap.clientHeight + 'px';
+  // Reset transform then apply DPR scaling
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+const resizeObserver = new ResizeObserver(resizeCanvas);
+resizeObserver.observe(document.getElementById('canvas-wrap'));
+resizeCanvas();
+
+// ── Interaction ────────────────────────────────────────────────────
+
+canvas.addEventListener('pointerdown', (e) => {
+  state.isDragging = true;
+  state.lastMouseX = e.clientX;
+  state.lastMouseY = e.clientY;
+});
+
+window.addEventListener('pointermove', (e) => {
+  if (!state.isDragging) return;
+  const dx = e.clientX - state.lastMouseX;
+  const dy = e.clientY - state.lastMouseY;
+  state.rotY += dx * 0.005;
+  state.rotX += dy * 0.005;
+  state.lastMouseX = e.clientX;
+  state.lastMouseY = e.clientY;
+});
+
+window.addEventListener('pointerup', () => {
+  state.isDragging = false;
+});
+
+// Scroll-wheel zoom
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -0.05 : 0.05;
+  state.zoom = Math.max(0.2, Math.min(5, state.zoom + delta));
+  const zoomInput = document.getElementById('zoom');
+  const zoomVal = document.getElementById('zoomVal');
+  zoomInput.value = state.zoom;
+  if (zoomVal) zoomVal.textContent = state.zoom.toFixed(2);
+}, { passive: false });
+
+// ── Animation Loop ─────────────────────────────────────────────────
+
+function animate() {
+  if (state.autoRotate && !state.isDragging) {
+    state.rotY += state.rotSpeed;
+  }
+  render();
+  requestAnimationFrame(animate);
+}
+
+// ── Export ──────────────────────────────────────────────────────────
+
+function exportPNG() {
+  const link = document.createElement('a');
+  link.download = `common-factor-${state.shapeType}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function exportSVG() {
+  const { w, h } = getLogicalSize();
+  const cx = w / 2;
+  const cy = h / 2;
+  const worldScale = getWorldScale(w, h) * (state.zoom || 1.0);
+
+  const effPersp = state.lensType === 'orthographic' ? Infinity : focalLengthToPerspD(state.focalLength ?? 50);
+  const projected = projectPoints(
+    state.points, state.rotX, state.rotY, state.rotZ,
+    effPersp, cx, cy, state.spacing, worldScale
+  );
+
+  const [cr, cg, cb] = hexToRGB(state.color);
+  const [ncr, ncg, ncb] = hexToRGB(state.nonConnectedColor || '#404040');
+  const connData = state.connectionData;
+
+  // Build connected set for highlight mode
+  let connectedSet = null;
+  if (state.highlightConnected && connData && connData.connections.length > 0) {
+    connectedSet = new Set();
+    for (const conn of connData.connections) connectedSet.add(conn.particleIdx);
+  }
+
+  // Connection lines + hub squares (before sort, so indices are intact)
+  let lines = '';
+  if (state.connectionsEnabled && connData && connData.hubs.length > 0) {
+    const projectedHubs = projectPoints(
+      connData.hubs, state.rotX, state.rotY, state.rotZ,
+      effPersp, cx, cy, state.spacing, worldScale
+    );
+
+    for (const conn of connData.connections) {
+      const pFrom = projected[conn.particleIdx];
+      const pTo = projectedHubs[conn.hubIdx];
+      if (!pFrom || !pTo || pFrom.scale <= 0 || pTo.scale <= 0) continue;
+
+      const avgScale = (pFrom.scale + pTo.scale) / 2;
+      const alpha = state.connectionDepthOpacity
+        ? Math.max(0.02, Math.min(1.0, state.connectionOpacity * (0.3 + avgScale * 0.7)))
+        : state.connectionOpacity;
+      const thickness = state.depthSizing
+        ? state.connectionThickness * avgScale
+        : state.connectionThickness;
+
+      lines += `  <line x1="${pFrom.sx.toFixed(1)}" y1="${pFrom.sy.toFixed(1)}" x2="${pTo.sx.toFixed(1)}" y2="${pTo.sy.toFixed(1)}" stroke="rgba(${cr},${cg},${cb},${alpha.toFixed(2)})" stroke-width="${thickness.toFixed(1)}" stroke-linecap="round"/>\n`;
+    }
+
+    if (state.hubVisible) {
+      for (const pH of projectedHubs) {
+        if (pH.scale <= 0) continue;
+        const size = state.depthSizing ? state.hubSize * pH.scale : state.hubSize;
+        const a = state.depthOpacity
+          ? Math.max(0.1, Math.min(1.0, 0.3 + pH.scale * 0.7))
+          : 0.85;
+        lines += `  <rect x="${(pH.sx - size / 2).toFixed(1)}" y="${(pH.sy - size / 2).toFixed(1)}" width="${size.toFixed(1)}" height="${size.toFixed(1)}" fill="rgba(${cr},${cg},${cb},${a.toFixed(2)})"/>\n`;
+      }
+    }
+  }
+
+  // Now sort for particle rects
+  projected.sort((a, b) => b.depth - a.depth);
+
+  let rects = '';
+  for (let i = 0; i < projected.length; i++) {
+    const p = projected[i];
+    if (p.scale <= 0) continue;
+    const size = state.depthSizing ? state.squareSize * p.scale : state.squareSize;
+    let alpha = state.depthOpacity
+      ? Math.max(0.05, Math.min(1.0, 0.3 + p.scale * 0.7))
+      : 0.85;
+    const useNonConnected = connectedSet && !connectedSet.has(p.origIdx);
+    if (useNonConnected) alpha *= (state.nonConnectedOpacity != null ? state.nonConnectedOpacity : 0.4);
+    const [rr, gg, bb] = useNonConnected ? [ncr, ncg, ncb] : [cr, cg, cb];
+    rects += `  <rect x="${(p.sx - size / 2).toFixed(1)}" y="${(p.sy - size / 2).toFixed(1)}" width="${size.toFixed(1)}" height="${size.toFixed(1)}" fill="rgba(${rr},${gg},${bb},${alpha.toFixed(2)})"/>\n`;
+  }
+
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  <rect width="100%" height="100%" fill="${state.bgColor}"/>
+${lines}${rects}</svg>`;
+
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const link = document.createElement('a');
+  link.download = `common-factor-${state.shapeType}.svg`;
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+document.getElementById('exportPNG').addEventListener('click', exportPNG);
+document.getElementById('exportSVG').addEventListener('click', exportSVG);
+
+// ── Copy Embed Code ──────────────────────────────────────────────
+
+function generateEmbedCode() {
+  const attrs = [];
+
+  // Shape
+  attrs.push(`shape="${state.shapeType}"`);
+  attrs.push(`density="${state.density}"`);
+  if (state.spacing !== 1.0) attrs.push(`spacing="${state.spacing}"`);
+  if (state.randomness > 0) attrs.push(`randomness="${state.randomness}"`);
+
+  // Shape-specific
+  if ((state.shapeType === 'galaxy' || state.shapeType === 'spiralGalaxy') && state.spiralArms !== 4) {
+    attrs.push(`spiral-arms="${state.spiralArms}"`);
+  }
+  if (state.shapeType === 'svgExtrude' && state.extrudeDepth !== 0.5) {
+    attrs.push(`extrude-depth="${state.extrudeDepth}"`);
+  }
+  if (state.snapToGrid) attrs.push('snap-to-grid');
+
+  // Appearance
+  attrs.push(`color="${state.color}"`);
+  if (state.bgColor !== '#0a0a0a') attrs.push(`bg="${state.bgColor}"`);
+  if (state.squareSize !== 3) attrs.push(`size="${state.squareSize}"`);
+  if (state.depthOpacity) attrs.push('depth-opacity');
+  if (state.depthSizing) attrs.push('depth-sizing');
+
+  // Camera
+  if (state.zoom !== 1.0) attrs.push(`zoom="${state.zoom}"`);
+  if (state.lensType === 'orthographic') attrs.push('lens="orthographic"');
+  else if (state.focalLength !== 50) attrs.push(`focal-length="${state.focalLength}"`);
+  if (state.rotSpeed !== 0.003) attrs.push(`speed="${state.rotSpeed}"`);
+  if (state.autoRotate) attrs.push('auto-rotate');
+
+  // Connections
+  if (state.connectionsEnabled) {
+    attrs.push('connections');
+    if (state.hubCount !== 3) attrs.push(`hubs="${state.hubCount}"`);
+    if (state.connectionsPerHub !== 15) attrs.push(`connections-per-hub="${state.connectionsPerHub}"`);
+    if (state.hubPlacement !== 'mixed') attrs.push(`hub-placement="${state.hubPlacement}"`);
+    if (state.connectionDistribution !== 'weighted') attrs.push(`connection-distribution="${state.connectionDistribution}"`);
+    if (state.connectionSpread !== 0.5) attrs.push(`connection-spread="${state.connectionSpread}"`);
+    if (state.connectionFocus !== 0.5) attrs.push(`connection-focus="${state.connectionFocus}"`);
+    if (state.connectionOpacity !== 0.3) attrs.push(`connection-opacity="${state.connectionOpacity}"`);
+    if (state.connectionThickness !== 1) attrs.push(`connection-thickness="${state.connectionThickness}"`);
+    if (!state.hubVisible) attrs.push(`hub-visible="false"`);
+    if (state.hubSize !== 6) attrs.push(`hub-size="${state.hubSize}"`);
+    if (!state.connectionDepthOpacity) attrs.push(`connection-depth-opacity="false"`);
+    if (state.highlightConnected) attrs.push('highlight-connected');
+    if (state.highlightConnected && state.nonConnectedColor !== '#404040') {
+      attrs.push(`non-connected-color="${state.nonConnectedColor}"`);
+    }
+    if (state.highlightConnected && state.nonConnectedOpacity !== 0.4) {
+      attrs.push(`non-connected-opacity="${state.nonConnectedOpacity}"`);
+    }
+  }
+
+  const indent = '\n  ';
+  const attrStr = indent + attrs.join(indent);
+  const scriptUrl = 'https://cdn.jsdelivr.net/gh/com-mon-fac-tor/cf-particle-generator/particle-shape.bundle.js';
+
+  return `<script src="${scriptUrl}"><\/script>\n<particle-shape${attrStr}\n  style="width:100%;height:100%">\n</particle-shape>`;
+}
+
+document.getElementById('copyEmbed').addEventListener('click', () => {
+  const code = generateEmbedCode();
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById('copyEmbed');
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy Embed Code'; }, 2000);
+  });
+});
+
+// ── Controls Binding ───────────────────────────────────────────────
+
+function bindRange(id, stateKey, displayFormat, regenerates) {
+  const input = document.getElementById(id);
+  const valEl = document.getElementById(id + 'Val');
+  input.addEventListener('input', () => {
+    const v = parseFloat(input.value);
+    state[stateKey] = v;
+    if (valEl) valEl.textContent = displayFormat(v);
+    if (regenerates) regeneratePoints();
+  });
+}
+
+function bindCheckbox(id, stateKey, regenerates) {
+  const input = document.getElementById(id);
+  input.addEventListener('change', () => {
+    state[stateKey] = input.checked;
+    if (regenerates) regeneratePoints();
+  });
+}
+
+bindRange('density', 'density', v => v, true);
+bindRange('spiralArms', 'spiralArms', v => v, true);
+bindRange('extrudeDepth', 'extrudeDepth', v => v.toFixed(1), true);
+bindRange('spacing', 'spacing', v => v.toFixed(1), false);
+bindRange('randomness', 'randomness', v => v.toFixed(2), true);
+bindRange('squareSize', 'squareSize', v => v.toFixed(1), false);
+bindRange('zoom', 'zoom', v => v.toFixed(2), false);
+bindRange('perspective', 'focalLength', v => v + 'mm', false);
+document.getElementById('lensType').addEventListener('change', (e) => {
+  state.lensType = e.target.value;
+  document.getElementById('perspectiveGroup').style.display = state.lensType === 'perspective' ? '' : 'none';
+});
+bindRange('rotSpeed', 'rotSpeed', v => v.toFixed(3), false);
+
+bindCheckbox('snapToGrid', 'snapToGrid', true);
+bindCheckbox('autoRotate', 'autoRotate');
+
+// Connections
+bindRange('hubCount', 'hubCount', v => v, true);
+bindRange('connectionsPerHub', 'connectionsPerHub', v => v, true);
+bindRange('connectionSpread', 'connectionSpread', v => v.toFixed(2), true);
+bindRange('connectionFocus', 'connectionFocus', v => v.toFixed(2), true);
+bindRange('connectionOpacity', 'connectionOpacity', v => v.toFixed(2), false);
+bindRange('connectionThickness', 'connectionThickness', v => v.toFixed(1), false);
+bindRange('hubSize', 'hubSize', v => v.toFixed(1), false);
+bindCheckbox('hubVisible', 'hubVisible');
+bindCheckbox('connectionDepthOpacity', 'connectionDepthOpacity');
+bindCheckbox('highlightConnected', 'highlightConnected');
+
+document.getElementById('nonConnectedColor').addEventListener('input', (e) => {
+  state.nonConnectedColor = e.target.value;
+});
+bindRange('nonConnectedOpacity', 'nonConnectedOpacity', v => v.toFixed(2), false);
+
+document.getElementById('connectionsEnabled').addEventListener('change', (e) => {
+  state.connectionsEnabled = e.target.checked;
+  document.getElementById('connectionControls')
+    .classList.toggle('visible', state.connectionsEnabled);
+  regeneratePoints();
+});
+
+document.getElementById('hubPlacement').addEventListener('change', (e) => {
+  state.hubPlacement = e.target.value;
+  regeneratePoints();
+});
+
+document.getElementById('connectionDistribution').addEventListener('change', (e) => {
+  state.connectionDistribution = e.target.value;
+  regeneratePoints();
+});
+
+document.getElementById('color').addEventListener('input', (e) => {
+  state.color = e.target.value;
+});
+
+document.getElementById('bgColor').addEventListener('input', (e) => {
+  state.bgColor = e.target.value;
+});
+
+// SVG file upload handler
+document.getElementById('svgFileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  state.svgFileName = file.name;
+  document.getElementById('svgFileName').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const result = parseSVGFile(ev.target.result);
+    if (result) {
+      state.svgOutline = result.outline;
+      state.svgPath2D = result.svgPath2D;
+      state._svgNorm = result.svgNorm;
+    }
+    if (state.shapeType === 'svgExtrude') {
+      regeneratePoints();
+    }
+  };
+  reader.readAsText(file);
+});
+
+function updateShapeSpecificControls() {
+  const armsGroup = document.getElementById('spiralArmsGroup');
+  const svgGroup = document.getElementById('svgExtrudeGroup');
+  armsGroup.classList.toggle('visible', state.shapeType === 'spiralGalaxy');
+  svgGroup.classList.toggle('visible', state.shapeType === 'svgExtrude');
+}
+
+document.getElementById('shapeType').addEventListener('change', (e) => {
+  state.shapeType = e.target.value;
+  updateShapeSpecificControls();
+  regeneratePoints();
+});
+
+
+// ── Init ───────────────────────────────────────────────────────────
+
+updateShapeSpecificControls();
+document.getElementById('perspectiveGroup').style.display = state.lensType === 'perspective' ? '' : 'none';
+regeneratePoints();
+animate();
+</script>
+</body>
+</html>

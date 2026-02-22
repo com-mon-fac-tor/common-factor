@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Particle Shape — Embed Test</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #111;
+    color: #ccc;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    padding: 40px;
+  }
+
+  h1 {
+    font-size: 24px;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 32px;
+    max-width: 600px;
+    line-height: 1.5;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+  }
+
+  .card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .card-viewport {
+    width: 100%;
+    height: 300px;
+  }
+
+  .card-info {
+    padding: 16px;
+    border-top: 1px solid #2a2a2a;
+  }
+
+  .card-info h2 {
+    font-size: 14px;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .card-info code {
+    font-size: 11px;
+    color: #666;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    display: block;
+    white-space: pre-wrap;
+    line-height: 1.4;
+  }
+
+  .section {
+    margin-top: 48px;
+  }
+
+  .section h2 {
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .section p {
+    margin-bottom: 24px;
+  }
+
+  .hero {
+    width: 100%;
+    height: 500px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #2a2a2a;
+    margin-bottom: 48px;
+  }
+
+  #dynamic-demo {
+    width: 100%;
+    height: 300px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #2a2a2a;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #ccc;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .btn:hover {
+    background: #333;
+    border-color: #666;
+  }
+</style>
+
+<!-- ═══ Use the BUNDLE version (single file, no imports) ═══ -->
+<script src="particle-shape.bundle.js"></script>
+</head>
+<body>
+
+  <h1>Particle Shape — Embed Test</h1>
+  <p>
+    Testing the <code>&lt;particle-shape&gt;</code> web component.
+    Each card below is an independent instance. Drag any of them to rotate.
+  </p>
+
+  <!-- Hero: full-width galaxy -->
+  <div class="hero">
+    <particle-shape
+      shape="spiralGalaxy"
+      density="4000"
+      color="#c8b4ff"
+      bg="#050510"
+      size="2"
+      speed="0.001"
+      spiral-arms="5"
+      auto-rotate
+      depth-opacity
+      depth-sizing>
+    </particle-shape>
+  </div>
+
+  <!-- Grid of shapes -->
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-viewport">
+        <particle-shape
+          shape="sphere"
+          density="2000"
+          color="#ffffff"
+          size="3"
+          auto-rotate
+          depth-opacity
+          depth-sizing>
+        </particle-shape>
+      </div>
+      <div class="card-info">
+        <h2>Sphere</h2>
+        <code>shape="sphere" density="2000"</code>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-viewport">
+        <particle-shape
+          shape="cube"
+          density="1500"
+          color="#ff6b6b"
+          size="3"
+          speed="0.004"
+          auto-rotate
+          depth-opacity
+          depth-sizing>
+        </particle-shape>
+      </div>
+      <div class="card-info">
+        <h2>Cube</h2>
+        <code>shape="cube" density="1500" color="#ff6b6b"</code>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-viewport">
+        <particle-shape
+          shape="torus"
+          density="2500"
+          color="#4ecdc4"
+          size="2.5"
+          speed="0.002"
+          auto-rotate
+          depth-opacity
+          depth-sizing>
+        </particle-shape>
+      </div>
+      <div class="card-info">
+        <h2>Torus</h2>
+        <code>shape="torus" density="2500" color="#4ecdc4"</code>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-viewport">
+        <particle-shape
+          shape="helix"
+          density="1200"
+          color="#ffd93d"
+          bg="#0a0808"
+          size="3"
+          speed="0.005"
+          auto-rotate
+          depth-opacity
+          depth-sizing>
+        </particle-shape>
+      </div>
+      <div class="card-info">
+        <h2>Double Helix</h2>
+        <code>shape="helix" density="1200" color="#ffd93d"</code>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-viewport">
+        <particle-shape
+          shape="cylinder"
+          density="1800"
+          color="#a8e6cf"
+          size="2.5"
+          speed="0.003"
+          auto-rotate
+          depth-opacity
+          depth-sizing>
+        </particle-shape>
+      </div>
+      <div class="card-info">
+        <h2>Cylinder</h2>
+        <code>shape="cylinder" density="1800" color="#a8e6cf"</code>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-viewport">
+        <particle-shape
+          shape="galaxy"
+          density="3000"
+          color="#ddd6fe"
+          bg="#08080f"
+          size="2"
+          speed="0.001"
+          auto-rotate
+          depth-opacity
+          depth-sizing>
+        </particle-shape>
+      </div>
+      <div class="card-info">
+        <h2>Galaxy</h2>
+        <code>shape="galaxy" density="3000" color="#ddd6fe"</code>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-viewport">
+        <particle-shape
+          shape="sphere"
+          density="2000"
+          color="#ff9f43"
+          size="2.5"
+          speed="0.002"
+          connections
+          hubs="4"
+          connections-per-hub="25"
+          connection-opacity="0.25"
+          connection-thickness="1"
+          hub-placement="mixed"
+          connection-distribution="weighted"
+          connection-spread="0.7"
+          connection-focus="0.3"
+          hub-visible
+          hub-size="8"
+          auto-rotate
+          depth-opacity
+          depth-sizing>
+        </particle-shape>
+      </div>
+      <div class="card-info">
+        <h2>Weighted Spread</h2>
+        <code>distribution="weighted" spread="0.7" focus="0.3"</code>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-viewport">
+        <particle-shape
+          shape="torus"
+          density="2500"
+          color="#74b9ff"
+          size="2"
+          speed="0.003"
+          connections
+          hubs="5"
+          connections-per-hub="20"
+          connection-opacity="0.2"
+          hub-placement="outside"
+          connection-distribution="random"
+          connection-spread="1.0"
+          hub-visible
+          auto-rotate
+          depth-opacity
+          depth-sizing>
+        </particle-shape>
+      </div>
+      <div class="card-info">
+        <h2>Random Distribution</h2>
+        <code>distribution="random" spread="1.0"</code>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-viewport">
+        <particle-shape
+          shape="cube"
+          density="1500"
+          color="#a29bfe"
+          size="2.5"
+          speed="0.004"
+          connections
+          hubs="3"
+          connections-per-hub="30"
+          connection-opacity="0.2"
+          hub-placement="inside"
+          connection-distribution="stratified"
+          connection-spread="0.8"
+          hub-visible
+          hub-size="7"
+          auto-rotate
+          depth-opacity
+          depth-sizing>
+        </particle-shape>
+      </div>
+      <div class="card-info">
+        <h2>Stratified Bands</h2>
+        <code>distribution="stratified" spread="0.8"</code>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-viewport">
+        <particle-shape
+          shape="spiralGalaxy"
+          density="3000"
+          color="#ffeaa7"
+          bg="#050508"
+          size="2"
+          speed="0.001"
+          spiral-arms="4"
+          connections
+          hubs="5"
+          connections-per-hub="20"
+          connection-opacity="0.35"
+          connection-distribution="weighted"
+          connection-spread="0.6"
+          connection-focus="0.4"
+          hub-placement="mixed"
+          hub-visible
+          hub-size="6"
+          highlight-connected
+          zoom="1.2"
+          auto-rotate
+          depth-opacity
+          depth-sizing>
+        </particle-shape>
+      </div>
+      <div class="card-info">
+        <h2>Highlight Connected</h2>
+        <code>highlight-connected zoom="1.2"</code>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Dynamic attribute test -->
+  <div class="section">
+    <h2>Dynamic Attribute Changes</h2>
+    <p>Click the buttons below to change the shape at runtime — no reload needed.</p>
+
+    <div id="dynamic-demo">
+      <particle-shape
+        id="dynamic"
+        shape="sphere"
+        density="2000"
+        color="#ffffff"
+        auto-rotate
+        depth-opacity
+        depth-sizing>
+      </particle-shape>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="document.getElementById('dynamic').setAttribute('shape', 'sphere')">Sphere</button>
+      <button class="btn" onclick="document.getElementById('dynamic').setAttribute('shape', 'cube')">Cube</button>
+      <button class="btn" onclick="document.getElementById('dynamic').setAttribute('shape', 'torus')">Torus</button>
+      <button class="btn" onclick="document.getElementById('dynamic').setAttribute('shape', 'helix')">Helix</button>
+      <button class="btn" onclick="document.getElementById('dynamic').setAttribute('shape', 'galaxy')">Galaxy</button>
+      <button class="btn" onclick="document.getElementById('dynamic').setAttribute('shape', 'spiralGalaxy')">Spiral Galaxy</button>
+      <button class="btn" onclick="document.getElementById('dynamic').setAttribute('shape', 'cylinder')">Cylinder</button>
+      <button class="btn" onclick="document.getElementById('dynamic').setAttribute('color', '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0'))">Random Color</button>
+      <button class="btn" onclick="document.getElementById('dynamic').setAttribute('density', String(Math.floor(Math.random() * 4000) + 500))">Random Density</button>
+      <button class="btn" onclick="var d=document.getElementById('dynamic'); d.hasAttribute('connections') ? d.removeAttribute('connections') : d.setAttribute('connections','')">Toggle Connections</button>
+    </div>
+  </div>
+
+</body>
+</html>

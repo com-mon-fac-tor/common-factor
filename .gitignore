@@ -1,0 +1,16 @@
+# Proprietary assets
+fonts/
+icons/
+cf.logo.wordmark.svg
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor / AI tools
+.cursor/
+.vscode/
+.claude/
+*.swp
+*.swo

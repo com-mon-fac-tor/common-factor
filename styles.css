@@ -1,0 +1,473 @@
+/* Cosmos color variables */
+:root {
+  --white: #FFFFFF;
+  --offWhite: #F6F5F2;
+  --lightGray: #EAE9E6;
+  --gray: #BCBBB4;
+  --darkGray: #8B877E;
+  --deepGray: #2c2c2c;
+  --black: #1B1B1B;
+  --backgroundBlack: #0A0A0A;
+  --deepBlack: #000000;
+  --surface: var(--black);
+  --surfaceElevated: var(--deepGray);
+  --border: var(--deepGray);
+  --accent: #9F7427;
+}
+
+@font-face {
+  font-family: 'Saans';
+  src: url('./fonts/Saans-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Saans';
+  src: url('./fonts/Saans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Saans';
+  src: url('./fonts/Saans-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Saans';
+  src: url('./fonts/Saans-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Saans';
+  src: url('./fonts/Saans-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Saans';
+  src: url('./fonts/Saans-Heavy.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Serrif Mono';
+  src: url('./fonts/SerrifMonoCompressed-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  background: var(--backgroundBlack);
+}
+
+body {
+  background: var(--backgroundBlack);
+  color: var(--lightGray);
+  font-family: 'Saans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  height: 100vh;
+}
+
+#app {
+  position: relative;
+  height: 100vh;
+}
+
+#canvas-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+#viewport {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+#viewport:active {
+  cursor: grabbing;
+}
+
+#controls-wrap {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  bottom: 32px;
+  width: 280px;
+  border-radius: 32px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+#controls-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 32px;
+  padding: 1px;
+  background: linear-gradient(to bottom, var(--deepGray), var(--black));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#controls-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 128px;
+  background: linear-gradient(to bottom, transparent, rgba(27, 27, 27, 0.85));
+  pointer-events: none;
+  border-radius: 0 0 32px 32px;
+}
+
+#controls {
+  background: transparent;
+  opacity: 1;
+  padding: 0 12px 64px;
+  overflow-y: overlay;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  scrollbar-color: rgba(139, 135, 126, 0.25) transparent;
+}
+
+#controls::-webkit-scrollbar {
+  width: 4px;
+}
+
+#controls::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#controls::-webkit-scrollbar-thumb {
+  background: rgba(139, 135, 126, 0.25);
+  border-radius: 2px;
+  min-height: 40px;
+}
+
+#controls::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 135, 126, 0.5);
+}
+
+#controls-header {
+  flex-shrink: 0;
+  background: transparent;
+  padding: 24px 32px 16px;
+  z-index: 10;
+}
+
+#panel-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: 'Serrif Mono', ui-monospace, monospace;
+  font-size: 21px;
+  color: var(--gray);
+  letter-spacing: 0.01em;
+}
+
+#panel-version {
+  font-family: 'Serrif Mono', ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--darkGray);
+  letter-spacing: 0.02em;
+}
+
+#canvas-logo {
+  position: absolute;
+  bottom: 32px;
+  left: 32px;
+  width: 150px;
+  height: 20px;
+  background-color: var(--darkGray);
+  -webkit-mask-image: url(./cf.logo.wordmark.svg);
+  mask-image: url(./cf.logo.wordmark.svg);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.section-card {
+  position: relative;
+  background: rgba(44, 44, 44, 0.6);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.section-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  padding: 1px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.section-body-inner {
+  padding: 0 16px 16px;
+}
+
+.section-label {
+  font-family: 'Serrif Mono', ui-monospace, monospace;
+  font-size: 15px;
+  text-transform: none;
+  color: var(--darkGray);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  background-color: var(--darkGray);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.control-group {
+  margin-bottom: 10px;
+}
+
+.control-group label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Saans', sans-serif;
+  font-size: 13px;
+  color: var(--gray);
+  margin-bottom: 4px;
+}
+
+.control-group .value {
+  font-family: 'Serrif Mono', ui-monospace, monospace;
+  color: var(--gray);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--surfaceElevated);
+  border-radius: 3px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--lightGray);
+  cursor: pointer;
+  border: none;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: var(--white);
+}
+
+select {
+  width: 100%;
+  padding: 8px 32px 8px 12px;
+  background: var(--surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238B877E' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  -webkit-appearance: none;
+  appearance: none;
+  color: var(--lightGray);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Saans', sans-serif;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+
+select:hover { border-color: var(--darkGray); }
+
+input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Saans', sans-serif;
+  font-size: 13px;
+  color: var(--gray);
+  cursor: pointer;
+}
+
+.checkbox-group label::before {
+  content: '';
+  display: block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.checkbox-group input[type="checkbox"]:checked + label::before {
+  background: var(--accent);
+  border-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='8' viewBox='0 0 10 8'%3E%3Cpath d='M1 4l3 3 5-6' stroke='%230a0a0a' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.checkbox-group label:hover::before {
+  border-color: var(--darkGray);
+}
+
+.export-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.export-btn {
+  flex: 1;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--lightGray);
+  font-family: 'Saans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.export-btn:hover {
+  background: var(--surfaceElevated);
+  border-color: var(--darkGray);
+  color: var(--white);
+}
+
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shape-specific { display: none; }
+.shape-specific.visible { display: block; }
+
+.upload-btn {
+  display: inline-block;
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--lightGray);
+  font-family: 'Saans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.upload-btn:hover {
+  background: var(--surfaceElevated);
+  border-color: var(--darkGray);
+  color: var(--white);
+}
+.upload-file-input { display: none; }
+.svg-filename {
+  font-family: 'Saans', sans-serif;
+  font-size: 11px;
+  color: var(--darkGray);
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.color-row label {
+  font-family: 'Saans', sans-serif;
+  font-size: 13px;
+  color: var(--gray);
+}
