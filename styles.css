@@ -213,7 +213,7 @@ body {
   bottom: 32px;
   left: 32px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
   pointer-events: none;
 }
@@ -232,9 +232,9 @@ body {
 }
 
 #canvas-copyright {
-  font-family: 'Saans', sans-serif;
+  font-family: 'Serrif Mono', ui-monospace, monospace;
   font-size: 11px;
-  color: var(--darkGray);
+  color: var(--deepGray);
 }
 
 .section-card {
