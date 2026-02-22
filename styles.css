@@ -208,10 +208,17 @@ body {
   letter-spacing: 0.02em;
 }
 
-#canvas-logo {
+#canvas-branding {
   position: absolute;
   bottom: 32px;
   left: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+
+#canvas-logo {
   width: 150px;
   height: 20px;
   background-color: var(--darkGray);
@@ -221,7 +228,13 @@ body {
   mask-size: contain;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-  pointer-events: none;
+  flex-shrink: 0;
+}
+
+#canvas-copyright {
+  font-family: 'Saans', sans-serif;
+  font-size: 11px;
+  color: var(--darkGray);
 }
 
 .section-card {
@@ -473,7 +486,7 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
 }
 
 #controls-footer {
-  font-family: 'Saans', sans-serif;
+  font-family: 'Serrif Mono', ui-monospace, monospace;
   font-size: 11px;
   color: var(--darkGray);
   text-align: center;
