@@ -1,7 +1,3 @@
-# Proprietary assets
-fonts/
-icons/
-cf.logo.wordmark.svg
 
 # macOS
 .DS_Store
