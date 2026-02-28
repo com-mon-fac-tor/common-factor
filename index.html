@@ -33,11 +33,30 @@
             <option value="cylinder">Cylinder</option>
             <option value="helix">Double Helix</option>
             <option value="svgExtrude">SVG Extrude</option>
+            <option value="voronoi">Voronoi</option>
           </select>
         </div>
         <div class="control-group shape-specific" id="spiralArmsGroup">
           <label>Arms <span class="value" id="spiralArmsVal">4</span></label>
           <input type="range" id="spiralArms" min="1" max="8" step="1" value="4">
+        </div>
+        <div class="shape-specific" id="voronoiGroup">
+          <div class="control-group">
+            <label>Cells <span class="value" id="voronoiCellsVal">12</span></label>
+            <input type="range" id="voronoiCells" min="3" max="30" step="1" value="12">
+          </div>
+          <div class="control-group">
+            <label>Membrane Width <span class="value" id="voronoiMembraneWidthVal">0.05</span></label>
+            <input type="range" id="voronoiMembraneWidth" min="0.01" max="0.15" step="0.005" value="0.05">
+          </div>
+          <div class="control-group">
+            <label>Speed <span class="value" id="voronoiSpeedVal">0.5</span></label>
+            <input type="range" id="voronoiSpeed" min="0" max="3" step="0.1" value="0.5">
+          </div>
+          <div class="control-group">
+            <label>Variability <span class="value" id="voronoiVariabilityVal">0.50</span></label>
+            <input type="range" id="voronoiVariability" min="0" max="1" step="0.05" value="0.5">
+          </div>
         </div>
         <div class="shape-specific" id="svgExtrudeGroup">
           <div class="control-group">
@@ -72,6 +91,24 @@
           <label>Randomness <span class="value" id="randomnessVal">0.00</span></label>
           <input type="range" id="randomness" min="0" max="1" step="0.05" value="0">
         </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="float">
+          <label for="float">Float</label>
+        </div>
+        <div class="shape-specific" id="floatControls">
+          <div class="control-group">
+            <label>Radius <span class="value" id="floatRadiusVal">0.10</span></label>
+            <input type="range" id="floatRadius" min="0.01" max="0.5" step="0.01" value="0.1">
+          </div>
+          <div class="control-group">
+            <label>Speed <span class="value" id="floatSpeedVal">1.0</span></label>
+            <input type="range" id="floatSpeed" min="0.1" max="5" step="0.1" value="1">
+          </div>
+          <div class="control-group">
+            <label>Variability <span class="value" id="floatVariabilityVal">0.50</span></label>
+            <input type="range" id="floatVariability" min="0" max="1" step="0.05" value="0.5">
+          </div>
+        </div>
       </div>
     </div>
 
@@ -81,6 +118,10 @@
         <div class="control-group">
           <label>Square Size <span class="value" id="squareSizeVal">3.0</span></label>
           <input type="range" id="squareSize" min="1" max="12" step="0.5" value="3">
+        </div>
+        <div class="control-group">
+          <label>Pixelate <span class="value" id="pixelateVal">Off</span></label>
+          <input type="range" id="pixelate" min="0" max="32" step="1" value="0">
         </div>
         <div class="color-row">
           <label>Dot color</label>
@@ -192,6 +233,18 @@
           <input type="range" id="zoom" min="0.2" max="5" step="0.05" value="1">
         </div>
         <div class="control-group">
+          <label>Rotation X <span class="value" id="rotXVal">0°</span></label>
+          <input type="range" id="rotX" min="-3.14159" max="3.14159" step="0.01" value="0">
+        </div>
+        <div class="control-group">
+          <label>Rotation Y <span class="value" id="rotYVal">0°</span></label>
+          <input type="range" id="rotY" min="-3.14159" max="3.14159" step="0.01" value="0">
+        </div>
+        <div class="control-group">
+          <label>Rotation Z <span class="value" id="rotZVal">0°</span></label>
+          <input type="range" id="rotZ" min="-3.14159" max="3.14159" step="0.01" value="0">
+        </div>
+        <div class="control-group">
           <label>Rotation Speed <span class="value" id="rotSpeedVal">0.003</span></label>
           <input type="range" id="rotSpeed" min="0" max="0.02" step="0.001" value="0.003">
         </div>
@@ -209,6 +262,8 @@
           <button class="export-btn" id="exportPNG">PNG</button>
           <button class="export-btn" id="exportSVG">SVG</button>
         </div>
+        <div style="height:8px"></div>
+        <button class="export-btn" id="exportVideo" style="width:100%">Export Video (WebM)</button>
         <div style="height:8px"></div>
         <button class="export-btn" id="copyEmbed" style="width:100%">Copy Embed Code</button>
       </div>
@@ -264,6 +319,15 @@ const state = {
   nonConnectedOpacity: 0.4,
   connectionData: { hubs: [], connections: [] },
   zoom: 1.0,
+  pixelate: 0,
+  float: false,
+  floatRadius: 0.1,
+  floatSpeed: 1.0,
+  floatVariability: 0.5,
+  voronoiCells: 12,
+  voronoiMembraneWidth: 0.05,
+  voronoiSpeed: 0.5,
+  voronoiVariability: 0.5,
   // Interaction
   isDragging: false,
   lastMouseX: 0,
@@ -271,9 +335,109 @@ const state = {
   points: [],
 };
 
+// ── Voronoi Generator ──────────────────────────────────────────────
+
+let _voronoiSamples = [];
+
+function initVoronoiSamples() {
+  const needed = Math.max(state.density * 6, 8000);
+  const gridRes = Math.ceil(Math.sqrt(needed));
+  const samples = [];
+  for (let xi = 0; xi < gridRes; xi++) {
+    for (let yi = 0; yi < gridRes; yi++) {
+      samples.push({
+        x: ((xi + 0.5 + (Math.random() - 0.5) * 0.85) / gridRes) * 2 - 1,
+        y: ((yi + 0.5 + (Math.random() - 0.5) * 0.85) / gridRes) * 2 - 1,
+      });
+    }
+  }
+  // Shuffle so filtering always picks a spatially uniform subset
+  for (let i = samples.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [samples[i], samples[j]] = [samples[j], samples[i]];
+  }
+  _voronoiSamples = samples;
+}
+
+function generateVoronoiPoints(t) {
+  const count = state.density;
+  const mw = state.voronoiMembraneWidth;
+  const vari = state.voronoiVariability;
+  const numSeeds = Math.max(3, state.voronoiCells);
+
+  // Golden-ratio spiral seed layout with per-seed animation
+  const seeds = [];
+  for (let i = 0; i < numSeeds; i++) {
+    const theta = i * 2.399963; // golden angle
+    const r0 = Math.sqrt((i + 0.5) / numSeeds) * 0.75;
+    const cx = r0 * Math.cos(theta);
+    const cy = r0 * Math.sin(theta);
+    const orbitR = 0.08 + ((i * 0.137) % 1) * 0.12;
+    const freq = state.voronoiSpeed * (0.4 + ((i * 0.31) % 1) * vari * 0.8);
+    const phase = i * 1.618;
+    seeds.push({
+      x: cx + orbitR * Math.cos(t * freq + phase),
+      y: cy + orbitR * Math.sin(t * freq * 0.71 + phase + 1.2),
+    });
+  }
+
+  // Filter precomputed samples to those near Voronoi edges
+  const result = [];
+  for (let si = 0; si < _voronoiSamples.length && result.length < count; si++) {
+    const s = _voronoiSamples[si];
+    let d1 = Infinity, d2 = Infinity;
+    for (const seed of seeds) {
+      const dx = s.x - seed.x, dy = s.y - seed.y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < d1) { d2 = d1; d1 = d; } else if (d < d2) { d2 = d; }
+    }
+    if (d2 - d1 < mw) result.push({ x: s.x, y: s.y, z: 0 });
+  }
+  return result;
+}
+
+// ── Float ──────────────────────────────────────────────────────────
+
+let _floatPhases = [];
+
+function initFloatPhases() {
+  _floatPhases = state.points.map(() => ({
+    px: Math.random() * Math.PI * 2,
+    py: Math.random() * Math.PI * 2,
+    pz: Math.random() * Math.PI * 2,
+    sx: Math.random() * 2 - 1, // variability seed x
+    sy: Math.random() * 2 - 1, // variability seed y
+    sz: Math.random() * 2 - 1, // variability seed z
+  }));
+}
+
+function getFloatPoints() {
+  const t = performance.now() * 0.001;
+  const base = state.floatSpeed;
+  const vari = state.floatVariability;
+  const r = state.floatRadius;
+  return state.points.map((p, i) => {
+    const ph = _floatPhases[i] || { px: 0, py: 0, pz: 0, sx: 0, sy: 0, sz: 0 };
+    const fx = base * (1 + ph.sx * vari);
+    const fy = base * (1 + ph.sy * vari);
+    const fz = base * (1 + ph.sz * vari);
+    return { ...p,
+      x: p.x + Math.sin(t * fx + ph.px) * r,
+      y: p.y + Math.cos(t * fy + ph.py) * r,
+      z: p.z + Math.sin(t * fz + ph.pz) * r,
+    };
+  });
+}
+
 function regeneratePoints() {
-  state.points = generatePoints(state);
+  if (state.shapeType === 'voronoi') {
+    initVoronoiSamples();
+    state.points = generateVoronoiPoints(0);
+  } else {
+    state.points = generatePoints(state);
+  }
   state.connectionData = generateConnections(state.points, state);
+  initFloatPhases();
 }
 
 // ── Renderer ───────────────────────────────────────────────────────
@@ -290,9 +454,30 @@ function getWorldScale(w, h) {
   return Math.min(w, h) * 0.35;
 }
 
+let _pixelCanvas = null;
+
 function render() {
   const { w, h } = getLogicalSize();
-  renderFrame(ctx, w, h, state.points, state);
+  let points;
+  if (state.shapeType === 'voronoi') {
+    points = generateVoronoiPoints(performance.now() * 0.001);
+  } else {
+    points = state.float ? getFloatPoints() : state.points;
+  }
+  const blockSize = state.pixelate;
+  if (blockSize > 1) {
+    if (!_pixelCanvas) _pixelCanvas = document.createElement('canvas');
+    const pw = Math.max(1, Math.round(w / blockSize));
+    const ph = Math.max(1, Math.round(h / blockSize));
+    _pixelCanvas.width = pw;
+    _pixelCanvas.height = ph;
+    renderFrame(_pixelCanvas.getContext('2d'), pw, ph, points, state);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(_pixelCanvas, 0, 0, w, h);
+  } else {
+    ctx.imageSmoothingEnabled = true;
+    renderFrame(ctx, w, h, points, state);
+  }
 }
 
 // ── Resize ─────────────────────────────────────────────────────────
@@ -328,6 +513,7 @@ window.addEventListener('pointermove', (e) => {
   state.rotX += dy * 0.005;
   state.lastMouseX = e.clientX;
   state.lastMouseY = e.clientY;
+  syncRotSliders();
 });
 
 window.addEventListener('pointerup', () => {
@@ -347,9 +533,16 @@ canvas.addEventListener('wheel', (e) => {
 
 // ── Animation Loop ─────────────────────────────────────────────────
 
+const _rec = { active: false, startRotY: 0, recorder: null, wasAutoRotate: false };
+
 function animate() {
   if (state.autoRotate && !state.isDragging) {
     state.rotY += state.rotSpeed;
+    if (_rec.active && state.rotY - _rec.startRotY >= 2 * Math.PI) {
+      state.rotY = _rec.startRotY; // snap to exact start for seamless loop
+      _rec.active = false;
+      _rec.recorder.stop();
+    }
   }
   render();
   requestAnimationFrame(animate);
@@ -453,8 +646,61 @@ ${lines}${rects}</svg>`;
   URL.revokeObjectURL(link.href);
 }
 
+function exportVideo() {
+  const btn = document.getElementById('exportVideo');
+  if (!window.MediaRecorder) {
+    btn.textContent = 'Not supported';
+    setTimeout(() => { btn.textContent = 'Export Video (WebM)'; }, 2000);
+    return;
+  }
+  if (state.rotSpeed === 0) {
+    btn.textContent = 'Set speed > 0';
+    setTimeout(() => { btn.textContent = 'Export Video (WebM)'; }, 2000);
+    return;
+  }
+
+  const mimeType = ['video/webm;codecs=vp9', 'video/webm']
+    .find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+
+  const stream = canvas.captureStream(60);
+  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 12_000_000 });
+  const chunks = [];
+
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: 'video/webm' });
+    const link = document.createElement('a');
+    link.download = `common-factor-${state.shapeType}.webm`;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+    state.autoRotate = _rec.wasAutoRotate;
+    btn.textContent = 'Export Video (WebM)';
+    btn.disabled = false;
+  };
+
+  _rec.wasAutoRotate = state.autoRotate;
+  _rec.startRotY = state.rotY;
+  _rec.recorder = recorder;
+  _rec.active = true;
+  state.autoRotate = true;
+
+  btn.textContent = 'Recording…';
+  btn.disabled = true;
+
+  recorder.start(100); // collect data every 100ms
+
+  // update progress label
+  const interval = setInterval(() => {
+    if (!_rec.active) { clearInterval(interval); return; }
+    const pct = Math.min(99, Math.round((state.rotY - _rec.startRotY) / (2 * Math.PI) * 100));
+    btn.textContent = `Recording ${pct}%`;
+  }, 200);
+}
+
 document.getElementById('exportPNG').addEventListener('click', exportPNG);
 document.getElementById('exportSVG').addEventListener('click', exportSVG);
+document.getElementById('exportVideo').addEventListener('click', exportVideo);
 
 // ── Copy Embed Code ──────────────────────────────────────────────
 
@@ -553,18 +799,50 @@ function bindCheckbox(id, stateKey, regenerates) {
   });
 }
 
+bindRange('voronoiCells', 'voronoiCells', v => Math.round(v), false);
+bindRange('voronoiMembraneWidth', 'voronoiMembraneWidth', v => v.toFixed(3), false);
+bindRange('voronoiSpeed', 'voronoiSpeed', v => v.toFixed(1), false);
+bindRange('voronoiVariability', 'voronoiVariability', v => v.toFixed(2), false);
+
 bindRange('density', 'density', v => v, true);
 bindRange('spiralArms', 'spiralArms', v => v, true);
 bindRange('extrudeDepth', 'extrudeDepth', v => v.toFixed(1), true);
 bindRange('spacing', 'spacing', v => v.toFixed(1), false);
 bindRange('randomness', 'randomness', v => v.toFixed(2), true);
 bindRange('squareSize', 'squareSize', v => v.toFixed(1), false);
+bindRange('pixelate', 'pixelate', v => v === 0 ? 'Off' : `${v}px`, false);
+
+document.getElementById('float').addEventListener('change', (e) => {
+  state.float = e.target.checked;
+  document.getElementById('floatControls').classList.toggle('visible', state.float);
+});
+bindRange('floatRadius', 'floatRadius', v => v.toFixed(2), false);
+bindRange('floatSpeed', 'floatSpeed', v => v.toFixed(1), false);
+bindRange('floatVariability', 'floatVariability', v => v.toFixed(2), false);
 bindRange('zoom', 'zoom', v => v.toFixed(2), false);
 bindRange('perspective', 'focalLength', v => v + 'mm', false);
 document.getElementById('lensType').addEventListener('change', (e) => {
   state.lensType = e.target.value;
   document.getElementById('perspectiveGroup').style.display = state.lensType === 'perspective' ? '' : 'none';
 });
+const toDeg = v => Math.round(v * 180 / Math.PI) + '°';
+const clampRot = v => Math.max(-Math.PI, Math.min(Math.PI, v));
+
+function syncRotSliders() {
+  const rx = clampRot(state.rotX);
+  const ry = clampRot(state.rotY);
+  const rz = clampRot(state.rotZ);
+  document.getElementById('rotX').value = rx;
+  document.getElementById('rotY').value = ry;
+  document.getElementById('rotZ').value = rz;
+  document.getElementById('rotXVal').textContent = toDeg(rx);
+  document.getElementById('rotYVal').textContent = toDeg(ry);
+  document.getElementById('rotZVal').textContent = toDeg(rz);
+}
+
+bindRange('rotX', 'rotX', toDeg, false);
+bindRange('rotY', 'rotY', toDeg, false);
+bindRange('rotZ', 'rotZ', toDeg, false);
 bindRange('rotSpeed', 'rotSpeed', v => v.toFixed(3), false);
 
 bindCheckbox('snapToGrid', 'snapToGrid', true);
@@ -636,8 +914,10 @@ document.getElementById('svgFileInput').addEventListener('change', (e) => {
 function updateShapeSpecificControls() {
   const armsGroup = document.getElementById('spiralArmsGroup');
   const svgGroup = document.getElementById('svgExtrudeGroup');
+  const voronoiGroup = document.getElementById('voronoiGroup');
   armsGroup.classList.toggle('visible', state.shapeType === 'spiralGalaxy');
   svgGroup.classList.toggle('visible', state.shapeType === 'svgExtrude');
+  voronoiGroup.classList.toggle('visible', state.shapeType === 'voronoi');
 }
 
 document.getElementById('shapeType').addEventListener('change', (e) => {
