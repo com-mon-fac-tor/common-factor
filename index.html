@@ -680,7 +680,7 @@ function generateEmbedCode() {
 
   const indent = '\n  ';
   const attrStr = indent + attrs.join(indent);
-  const scriptUrl = 'https://cdn.jsdelivr.net/gh/com-mon-fac-tor/cf-particle-generator@616e96d/particle-shape.bundle.js';
+  const scriptUrl = 'https://cdn.jsdelivr.net/gh/com-mon-fac-tor/cf-particle-generator@52d7a0d/particle-shape.bundle.js';
 
   return `<script src="${scriptUrl}"><\/script>\n<particle-shape${attrStr}\n  style="width:100%;height:100%;touch-action:pan-y">\n</particle-shape>\n<script>document.querySelector('particle-shape').addEventListener('wheel',e=>e.stopPropagation(),true)<\/script>`;
 }
