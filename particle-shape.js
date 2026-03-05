@@ -5,7 +5,7 @@
 //   <script type="module" src="particle-shape.js"></script>
 //   <particle-shape shape="sphere" density="2000" auto-rotate></particle-shape>
 
-import { generatePoints, generateConnections, renderFrame, initVoronoiSamples, generateVoronoiPoints, initFloatPhases, applyFloat } from './particle-engine.js';
+import { generatePoints, generateConnections, renderFrame, initVoronoiSamples, generateVoronoiPoints, initFloatPhases, applyFloat, parseSVGFile } from './particle-engine.js';
 
 class ParticleShape extends HTMLElement {
 
@@ -27,6 +27,7 @@ class ParticleShape extends HTMLElement {
       'zoom', 'pixelate',
       'float', 'float-radius', 'float-speed', 'float-variability',
       'voronoi-cells', 'voronoi-membrane-width', 'voronoi-speed', 'voronoi-variability',
+      'svg-src', 'svg-data',
     ];
   }
 
@@ -219,7 +220,25 @@ class ParticleShape extends HTMLElement {
       case 'voronoi-membrane-width':   c.voronoiMembraneWidth = parseFloat(value) || 0.05; break;
       case 'voronoi-speed':            c.voronoiSpeed = parseFloat(value) ?? 0.5; break;
       case 'voronoi-variability':      c.voronoiVariability = parseFloat(value) ?? 0.5; break;
+      case 'svg-data': {
+        const svgText = atob(value);
+        this._loadSVGText(svgText);
+        break;
+      }
+      case 'svg-src': {
+        fetch(value).then(r => r.text()).then(svgText => this._loadSVGText(svgText)).catch(() => {});
+        break;
+      }
     }
+  }
+
+  _loadSVGText(svgText) {
+    const result = parseSVGFile(svgText);
+    if (!result) return;
+    this._config.svgOutline = result.outline;
+    this._config.svgPath2D = result.svgPath2D;
+    this._config._svgNorm = result.svgNorm;
+    if (this._config.shapeType === 'svgExtrude') this._regenerate();
   }
 
   // ── Resize ────────────────────────────────────────────────────────

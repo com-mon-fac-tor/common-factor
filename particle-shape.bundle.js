@@ -637,6 +637,80 @@
     }
   }
 
+  // ── SVG Parser ───────────────────────────────────────────────────
+
+  function parseSVGFile(svgText) {
+    const container = document.createElement('div');
+    container.innerHTML = svgText;
+    const svgEl = container.querySelector('svg');
+    if (!svgEl) return null;
+
+    const tempSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    tempSVG.style.position = 'absolute';
+    tempSVG.style.left = '-9999px';
+    tempSVG.style.width = '0';
+    tempSVG.style.height = '0';
+    document.body.appendChild(tempSVG);
+
+    const geoTags = ['path', 'polygon', 'polyline', 'rect', 'circle', 'ellipse', 'line'];
+    const elements = [];
+    for (const tag of geoTags) elements.push(...svgEl.querySelectorAll(tag));
+
+    if (elements.length === 0) { document.body.removeChild(tempSVG); return null; }
+
+    const rawPoints = [];
+    const pathDatas = [];
+
+    for (const el of elements) {
+      const clone = el.cloneNode(true);
+      tempSVG.appendChild(clone);
+      if (typeof clone.getTotalLength === 'function') {
+        const len = clone.getTotalLength();
+        const sampleCount = Math.max(50, Math.ceil(len / 2));
+        for (let i = 0; i < sampleCount; i++) {
+          const pt = clone.getPointAtLength((i / sampleCount) * len);
+          rawPoints.push({ x: pt.x, y: pt.y });
+        }
+      }
+      if (el.tagName === 'path' && el.getAttribute('d')) {
+        pathDatas.push(el.getAttribute('d'));
+      } else if (el.tagName === 'rect') {
+        const rx = parseFloat(el.getAttribute('x') || 0), ry = parseFloat(el.getAttribute('y') || 0);
+        const rw = parseFloat(el.getAttribute('width') || 0), rh = parseFloat(el.getAttribute('height') || 0);
+        pathDatas.push(`M${rx},${ry} L${rx+rw},${ry} L${rx+rw},${ry+rh} L${rx},${ry+rh} Z`);
+      } else if (el.tagName === 'circle') {
+        const ccx = parseFloat(el.getAttribute('cx') || 0), ccy = parseFloat(el.getAttribute('cy') || 0), cr = parseFloat(el.getAttribute('r') || 0);
+        pathDatas.push(`M${ccx-cr},${ccy} A${cr},${cr} 0 1,0 ${ccx+cr},${ccy} A${cr},${cr} 0 1,0 ${ccx-cr},${ccy} Z`);
+      } else if (el.tagName === 'ellipse') {
+        const ecx = parseFloat(el.getAttribute('cx') || 0), ecy = parseFloat(el.getAttribute('cy') || 0);
+        const erx = parseFloat(el.getAttribute('rx') || 0), ery = parseFloat(el.getAttribute('ry') || 0);
+        pathDatas.push(`M${ecx-erx},${ecy} A${erx},${ery} 0 1,0 ${ecx+erx},${ecy} A${erx},${ery} 0 1,0 ${ecx-erx},${ecy} Z`);
+      } else if (el.tagName === 'polygon') {
+        const pts = el.getAttribute('points');
+        if (pts) pathDatas.push(`M${pts} Z`);
+      }
+      tempSVG.removeChild(clone);
+    }
+
+    document.body.removeChild(tempSVG);
+    if (rawPoints.length === 0) return null;
+
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const p of rawPoints) {
+      if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+    }
+    const maxRange = Math.max(maxX - minX || 1, maxY - minY || 1);
+    const centerX = (minX + maxX) / 2, centerY = (minY + maxY) / 2;
+    const outline = rawPoints.map(p => ({ x: ((p.x - centerX) / maxRange) * 2, y: ((p.y - centerY) / maxRange) * 2 }));
+    let svgPath2D = null, svgNorm = null;
+    if (pathDatas.length > 0) {
+      svgPath2D = new Path2D(pathDatas.join(' '));
+      svgNorm = { centerX, centerY, maxRange };
+    }
+    return { outline, svgPath2D, svgNorm };
+  }
+
   // ═══════════════════════════════════════════════════════════════════
   // WEB COMPONENT
   // ═══════════════════════════════════════════════════════════════════
@@ -661,6 +735,7 @@
         'zoom', 'pixelate',
         'float', 'float-radius', 'float-speed', 'float-variability',
         'voronoi-cells', 'voronoi-membrane-width', 'voronoi-speed', 'voronoi-variability',
+        'svg-src', 'svg-data',
       ];
     }
 
@@ -846,7 +921,25 @@
         case 'voronoi-membrane-width':   c.voronoiMembraneWidth = parseFloat(value) || 0.05; break;
         case 'voronoi-speed':            c.voronoiSpeed = parseFloat(value) ?? 0.5; break;
         case 'voronoi-variability':      c.voronoiVariability = parseFloat(value) ?? 0.5; break;
+        case 'svg-data': {
+          const svgText = atob(value);
+          this._loadSVGText(svgText);
+          break;
+        }
+        case 'svg-src': {
+          fetch(value).then(r => r.text()).then(svgText => this._loadSVGText(svgText)).catch(() => {});
+          break;
+        }
       }
+    }
+
+    _loadSVGText(svgText) {
+      const result = parseSVGFile(svgText);
+      if (!result) return;
+      this._config.svgOutline = result.outline;
+      this._config.svgPath2D = result.svgPath2D;
+      this._config._svgNorm = result.svgNorm;
+      if (this._config.shapeType === 'svgExtrude') this._regenerate();
     }
 
     // ── Resize ──────────────────────────────────────────────────────

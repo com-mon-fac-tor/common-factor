@@ -300,6 +300,7 @@ const state = {
   svgPath2D: null,      // Path2D for interior hit testing
   _svgNorm: null,
   svgFileName: '',
+  svgRawText: '',       // original SVG file text (for embed encoding)
   snapToGrid: false,
   lensType: 'perspective',
   focalLength: 50,
@@ -627,6 +628,9 @@ function generateEmbedCode() {
   if (state.shapeType === 'svgExtrude' && state.extrudeDepth !== 0.5) {
     attrs.push(`extrude-depth="${state.extrudeDepth}"`);
   }
+  if (state.shapeType === 'svgExtrude' && state.svgRawText) {
+    attrs.push(`svg-data="${btoa(unescape(encodeURIComponent(state.svgRawText)))}"`);
+  }
   if (state.snapToGrid) attrs.push('snap-to-grid');
   if (state.shapeType === 'voronoi') {
     if (state.voronoiCells !== 12) attrs.push(`voronoi-cells="${state.voronoiCells}"`);
@@ -839,6 +843,7 @@ document.getElementById('svgFileInput').addEventListener('change', (e) => {
       state.svgOutline = result.outline;
       state.svgPath2D = result.svgPath2D;
       state._svgNorm = result.svgNorm;
+      state.svgRawText = ev.target.result;
     }
     if (state.shapeType === 'svgExtrude') {
       regeneratePoints();
