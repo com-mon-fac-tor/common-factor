@@ -929,8 +929,9 @@
             this._config.svgOutline = outline;
             this._config.svgPath2D = null;
             this._config._svgNorm = null;
+            console.log('[ps] svg-data ok, pts:', outline.length, 'shape:', this._config.shapeType);
             if (this._config.shapeType === 'svgExtrude') this._regenerate();
-          } catch(e) {}
+          } catch(e) { console.error('[ps] svg-data error:', e); }
           break;
         }
         case 'svg-src': {
@@ -993,6 +994,7 @@
       } else {
         this._points = generatePoints(this._config);
       }
+      if (this._config.shapeType === 'svgExtrude') console.log('[ps] _regenerate svgExtrude, outline:', this._config.svgOutline.length, 'pts out:', this._points.length, 'logW:', this._logicalW);
       this._config.connectionData = generateConnections(this._points, this._config);
       this._floatPhases = initFloatPhases(this._points.length);
     }
